@@ -1,0 +1,126 @@
+[
+    {
+        "movie_id": "1111",
+        "movie_cn_name": "寶可夢",
+        "movie_en_name": "Pokemon go",
+        "movie_rating": "5.0",
+        "release_movie_time": "2021/08/07",
+        "movie_trailer": "https://movie_trailer",
+        "movie_poster": "https://poster",
+        "movie_photos": [
+            "https://movie_photos",
+            "https://movie_photos"
+        ],
+        "movie_introduction": "lorumsdapkokospadkkposadkpaskdpakks",
+        "actors": [
+            {
+                "actor_cn_name": "馮迪索",
+                "actor_en_name": "vin disal",
+                "actor_photo": "https://photo"
+            },
+            {
+                "actor_cn_name": "測試",
+                "actor_en_name": "test",
+                "actor_photo": "NULL"
+            }
+        ],
+        "locations_with_movietimes": [
+            {
+                "1234{area_id}": {
+                    "location": "台北市",
+                    "theater": [
+                        {
+                            "信義電影院": [
+                                "18:40",
+                                "00:00",
+                                "20:00"
+                            ],
+                            "商圈電影院": [
+                                "22:00",
+                                "22:30"
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "5678{area_id}": {
+                    "location": "新北市",
+                    "theater": [
+                        {
+                            "三重影城": [
+                                "10:00"
+                            ],
+                            "新莊影城": [
+                                "22:00",
+                                "11:00"
+                            ]
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "movie_id": "2222",
+        "movie_cn_name": "哈利波特",
+        "movie_en_name": "Harry Potter",
+        "movie_rating": "5.0",
+        "release_movie_time": "2021/08/07",
+        "movie_trailer": "https://movie_trailer",
+        "movie_poster": "https://poster",
+        "movie_photos": [
+            "https://movie_photos",
+            "https://movie_photos"
+        ],
+        "movie_introduction": "die",
+        "actors": [
+            {
+                "actor_cn_name": "哈利",
+                "actor_en_name": "Harry",
+                "actor_photo": "https://photo"
+            },
+            {
+                "actor_cn_name": "佛地魔",
+                "actor_en_name": "Voldermort",
+                "actor_photo": "NULL"
+            }
+        ],
+        "locations_with_movietimes": [
+            {
+                "1234{area_id}": {
+                    "location": "台北市",
+                    "theater": [
+                        {
+                            "信義電影院": [
+                                "18:40",
+                                "00:00",
+                                "20:00"
+                            ],
+                            "商圈電影院": [
+                                "22:00",
+                                "22:30"
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "5678{area_id}": {
+                    "location": "新北市",
+                    "theater": [
+                        {
+                            "三重影城": [
+                                "10:00"
+                            ],
+                            "新莊影城": [
+                                "22:00",
+                                "11:00"
+                            ]
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+]
