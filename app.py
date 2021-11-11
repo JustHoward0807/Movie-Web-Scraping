@@ -10,6 +10,8 @@ page = 1
 movie_photos_list = []
 actor_dic = {}
 actor_list = []
+movie_location_time_list = []
+movie_location_time_dic = {'8':{'location': '新北市', 'theater':{}}, '28':{'location': '台北市', 'theater':{}}}
 sumList = []
 area = [8,28]
 jsonFilePath = 'movie_output.json'
@@ -192,8 +194,39 @@ for pages in li_number:
                                     headers=headers, params=params, cookies=secrets.cookies)
                 view = response.json()['view']
                 movie_theater_sp = BeautifulSoup(view, 'lxml')
-                movie_theater = movie_theater_sp.find_all('ul')
-                print(movie_theater)
+                # movie_theater = movie_theater_sp.find_all('ul')
+                # for location, play_time in zip(movie_theater_sp.find_all('li', class_='adds'), movie_theater_sp.find_all('div', class_='input_picker jq_input_picker')): 
+                    
+                #     if(area_id == 28):
+                #         # print(play_time.text.split())
+                #         # print(location.a.text)
+                #         movie_location_time_dic = {'8':{'location': '新北市', 'theater':{}}, '28':{'location': '台北市', 'theater':{location.a.text:play_time.text.split()}}}
+                #         # movie_location_time_dic['28']['theater'][location.a.text] = play_time.text.split()
+                #         movie_location_time_list.append(movie_location_time_dic)
+                #         sumDic["locations_with_movietimes"] = movie_location_time_list
+                    
+                #     elif(area_id == 8):
+                #         # movie_location_time_dic['8']['theater'][location.a.text] = play_time.text.split()
+                #         movie_location_time_dic = {'8':{'location': '新北市', 'theater':{location.a.text:play_time.text.split()}}, '28':{'location': '台北市', 'theater':{}}}
+                #     else:
+                #         print('')
+                    
+                    # movie_location_time_list.append(movie_location_time_dic)
+                        
+                        # movie_location_time_list.append(movie_location_time_dic)
+                        
+                    
+                    # try:
+                    #     if(area_id == 8):
+                    #         photoDic['location8'].append(movie_name.li.a.text)
+                    #     elif(area_id== 28):
+                    #         photoDic['location28'].append(movie_name.li.a.text)
+                    #     else:
+                    #         None
+                    # except Exception:
+                    #     pass
+            print(movie_location_time_list)
+            
             # ------------------------------------------------
             # Write the data into json format
             sumDic = {
@@ -209,9 +242,11 @@ for pages in li_number:
                 "actors": actor_list,
                 "locations_with_movietimes":[]
             }
+            
             sumList.append(sumDic)
             movie_photos_list = []
             actor_list = []
+            movie_location_time_list = []
 with open(jsonFilePath, 'w', encoding="utf-8-sig") as jsonFile:
     e = json.dumps(sumList, ensure_ascii=False, indent=4)
     jsonFile.write(e)
