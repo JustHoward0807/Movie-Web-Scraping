@@ -1,5 +1,5 @@
 ﻿from os import error
-from secrets import *
+import secrets
 from bs4 import BeautifulSoup
 import requests
 import json
@@ -11,7 +11,10 @@ movie_photos_list = []
 actor_dic = {}
 actor_list = []
 sumList = []
+area = [8,28]
 jsonFilePath = 'movie_output.json'
+now = datetime.now()
+current_time = now.strftime('%Y-%m-%d')
 
 base_source = requests.get(
     f'https://movies.yahoo.com.tw/movie_intheaters.html').text
@@ -83,14 +86,19 @@ for pages in li_number:
                 f'https://movies.yahoo.com.tw/movieinfo_photos.html/id={movie_id}').text
             photo_soup = BeautifulSoup(photo_source, 'lxml')
             photo_pic = photo_soup.find('div', class_='pic')
-            photo_table = photo_pic.find_all('div', class_='td')
-            for photo in photo_table:
-                movie_photos = photo.find('img')['src']
-                if movie_photos != None:
-                    movie_photos_list.append(movie_photos)
-                else:
-                    print('Movie photo list is empty or something is wrong!!')
-                    movie_photo_list = []
+            try:
+                photo_table = photo_pic.find_all('div', class_='td')
+            except Exception:
+                photo_table = None
+                pass
+            if photo_table != None:
+                for photo in photo_table:
+                    movie_photos = photo.find('img')['src']
+                    if movie_photos != None:
+                        movie_photos_list.append(movie_photos)
+            else:
+                print('Movie photos are empty')
+                movie_photo_list = []
             print(movie_photos_list)
             
             
@@ -150,19 +158,44 @@ for pages in li_number:
             trailer_video = trailer_soup.find('div', class_='l_box_inner_20')
             
             try:
-                trailer_video_URL = trailer_video.find_all('a')[1]['href']
+                trailer_video_URL = trailer_video.find_all('a')[0]['href']
                 ## trailer_video_iframe = trailer_video.find('iframe')['src'].split('?')[0]
 
             except Exception as e:
-                print(e)
-                try:
-                    trailer_video_URL = trailer_video.find_all('a')[0]['href']
-                except Exception:
-                    trailer_video_URL = 'No Trailer'
+                print(f'Something wrong with the trailer part: {e}')
+                trailer_video_URL = 'No Trailer'
+                # try:
+                #     trailer_video_URL = trailer_video.find_all('a')[0]['href']
+                # except Exception:
+                #     trailer_video_URL = 'No Trailer'
                     
-            
+            # ------------------------------------------------
+            # Movie Location and Times
+            for area_id in area:
+                headers = {
+                'User-Agent': '{secrets.User_agent}',
+                'Accept': '*/*',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'Referer': 'https://movies.yahoo.com.tw/movietime_result.html/id={movie_id}',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Connection': 'keep-alive',
+                'TE': 'Trailers',
+                }
                 
-                
+                params = (
+                    ('movie_id', movie_id),
+                    ('date', current_time),
+                    ('area_id', area_id),
+                )
+
+                response = requests.get('https://movies.yahoo.com.tw/ajax/pc/get_schedule_by_movie',
+                                    headers=headers, params=params, cookies=secrets.cookies)
+                view = response.json()['view']
+                movie_theater_sp = BeautifulSoup(view, 'lxml')
+                movie_theater = movie_theater_sp.find_all('ul')
+                print(movie_theater)
+            # ------------------------------------------------
+            # Write the data into json format
             sumDic = {
                 "movie_id": movie_id,
                 "movie_cn_name": movie_cn_name,
