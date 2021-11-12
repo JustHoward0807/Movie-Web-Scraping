@@ -10,10 +10,12 @@ page = 1
 movie_photos_list = []
 actor_dic = {}
 actor_list = []
+theater_list = []
 movie_location_time_list = []
-movie_location_time_dic = {'8':{'location': '新北市', 'theater':{}}, '28':{'location': '台北市', 'theater':{}}}
+movie_location_time_dic = {'8': {'location': '新北市', 'theater': {}}, '28': {
+    'location': '台北市', 'theater': {}}}
 sumList = []
-area = [8,28]
+area = [8, 28]
 jsonFilePath = 'movie_output.json'
 now = datetime.now()
 current_time = now.strftime('%Y-%m-%d')
@@ -69,21 +71,22 @@ for pages in li_number:
             movie_introduction = movie.find(
                 'div', class_='release_text').span.text.replace(' ', '').replace('\n', '')
             # print(f'Movie introduction is: {movie_introduction.strip()}')
-            
+
             # ------------------------------------------------
-            #For Movie Detail Information (Actors, Ratings, photos, etc...)
+            # For Movie Detail Information (Actors, Ratings, photos, etc...)
             info_source = requests.get(
                 f'https://movies.yahoo.com.tw/movieinfo_main/{movie_id}').text
             info_soup = BeautifulSoup(info_source, 'lxml')
-            movie_rating = info_soup.find('div', class_='score_num count').text
-            print(f'Movie rating is: {movie_rating.strip()}')
-            
-            
-            
-            
-            
+            try:
+                movie_rating = info_soup.find(
+                    'div', class_='score_num count').text
+                print(f'Movie rating is: {movie_rating.strip()}')
+            except Exception as e:
+                print(f'Something happened with movie rating: {e}')
+                pass
+
             # ------------------------------------------------
-            #Movie Photos
+            # Movie Photos
             photo_source = requests.get(
                 f'https://movies.yahoo.com.tw/movieinfo_photos.html/id={movie_id}').text
             photo_soup = BeautifulSoup(photo_source, 'lxml')
@@ -102,10 +105,9 @@ for pages in li_number:
                 print('Movie photos are empty')
                 movie_photo_list = []
             print(movie_photos_list)
-            
-            
+
             # ------------------------------------------------
-            #Movie Actors Pics and Names
+            # Movie Actors Pics and Names
             actor_main = info_soup.find('div', class_='l_box have_arbox _c')
             actor_ul = actor_main.find(
                 'ul', class_='trailer_list alist starlist')
@@ -113,13 +115,13 @@ for pages in li_number:
             try:
                 actor_name = actor_ul.find_all('div', class_='actor_inner')
                 actor_img = actor_ul.find_all('div', class_='fotoinner')
-                   
-                for name, img in zip(actor_name, actor_img):    
+
+                for name, img in zip(actor_name, actor_img):
                     actor_names = name.find('h2').text.split(" ")[0]
                     actor_photos = img.find('img')['src']
                     if (actor_photos == '/build/images/noavatar.jpg'):
-                        actor_photos = ""  
-                        
+                        actor_photos = ""
+
                     if actor_names != '' or None:
                         actor_en1_name = name.find('h2').text.replace(
                             '\n', "").split(" ")[-2]
@@ -130,35 +132,34 @@ for pages in li_number:
                         else:
                             actor_en_name = actor_en2_name
                         actor_dic = {
-                                "actor_cn_name": actor_names,
-                                "actor_en_name": actor_en_name,
-                                "actor_photos": actor_photos
-                            }
-                            
-                        actor_list.append(actor_dic)                     
-                        
+                            "actor_cn_name": actor_names,
+                            "actor_en_name": actor_en_name,
+                            "actor_photos": actor_photos
+                        }
+
+                        actor_list.append(actor_dic)
+
                 print(actor_list)
-                
-               
+
             except Exception as e:
                 # print(e)
                 actor_list = [{}]
-                
-                
+
             # ------------------------------------------------
-            #Movies Trailer URL
-            
+            # Movies Trailer URL
+
             # Get trailer url
-            trailer = info_soup.find('div', class_='maincontent ga_trailer movie_intro')
+            trailer = info_soup.find(
+                'div', class_='maincontent ga_trailer movie_intro')
             trailer2 = trailer.find('div', class_='movie_tab')
             trailer_url = trailer2.find_all('a', class_='gabtn')[1]['href']
-            
+
             # Get video from the trailer url
             trailer_source = requests.get(trailer_url).text
             trailer_soup = BeautifulSoup(trailer_source, 'lxml')
             ## trailer_video = trailer_soup.find('div', class_='informbox _c notice')
             trailer_video = trailer_soup.find('div', class_='l_box_inner_20')
-            
+
             try:
                 trailer_video_URL = trailer_video.find_all('a')[0]['href']
                 ## trailer_video_iframe = trailer_video.find('iframe')['src'].split('?')[0]
@@ -170,20 +171,20 @@ for pages in li_number:
                 #     trailer_video_URL = trailer_video.find_all('a')[0]['href']
                 # except Exception:
                 #     trailer_video_URL = 'No Trailer'
-                    
+
             # ------------------------------------------------
             # Movie Location and Times
             for area_id in area:
                 headers = {
-                'User-Agent': '{secrets.User_agent}',
-                'Accept': '*/*',
-                'Accept-Language': 'en-US,en;q=0.5',
-                'Referer': 'https://movies.yahoo.com.tw/movietime_result.html/id={movie_id}',
-                'X-Requested-With': 'XMLHttpRequest',
-                'Connection': 'keep-alive',
-                'TE': 'Trailers',
+                    'User-Agent': '{secrets.User_agent}',
+                    'Accept': '*/*',
+                    'Accept-Language': 'en-US,en;q=0.5',
+                    'Referer': 'https://movies.yahoo.com.tw/movietime_result.html/id={movie_id}',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Connection': 'keep-alive',
+                    'TE': 'Trailers',
                 }
-                
+
                 params = (
                     ('movie_id', movie_id),
                     ('date', current_time),
@@ -191,31 +192,38 @@ for pages in li_number:
                 )
 
                 response = requests.get('https://movies.yahoo.com.tw/ajax/pc/get_schedule_by_movie',
-                                    headers=headers, params=params, cookies=secrets.cookies)
+                                        headers=headers, params=params, cookies=secrets.cookies)
                 view = response.json()['view']
                 movie_theater_sp = BeautifulSoup(view, 'lxml')
                 # movie_theater = movie_theater_sp.find_all('ul')
-                # for location, play_time in zip(movie_theater_sp.find_all('li', class_='adds'), movie_theater_sp.find_all('div', class_='input_picker jq_input_picker')): 
-                    
-                #     if(area_id == 28):
-                #         # print(play_time.text.split())
-                #         # print(location.a.text)
-                #         movie_location_time_dic = {'8':{'location': '新北市', 'theater':{}}, '28':{'location': '台北市', 'theater':{location.a.text:play_time.text.split()}}}
-                #         # movie_location_time_dic['28']['theater'][location.a.text] = play_time.text.split()
-                #         movie_location_time_list.append(movie_location_time_dic)
-                #         sumDic["locations_with_movietimes"] = movie_location_time_list
-                    
-                #     elif(area_id == 8):
-                #         # movie_location_time_dic['8']['theater'][location.a.text] = play_time.text.split()
-                #         movie_location_time_dic = {'8':{'location': '新北市', 'theater':{location.a.text:play_time.text.split()}}, '28':{'location': '台北市', 'theater':{}}}
-                #     else:
-                #         print('')
-                    
-                    # movie_location_time_list.append(movie_location_time_dic)
-                        
-                        # movie_location_time_list.append(movie_location_time_dic)
-                        
-                    
+                for location, play_time in zip(movie_theater_sp.find_all('li', class_='adds'), movie_theater_sp.find_all('div', class_='input_picker jq_input_picker')):
+                #TODO Fix the logic
+                    if(area_id == 28):
+                        if(location and play_time != None):
+                            # print(play_time.text.split())
+                            # print(location.a.text)
+
+                            theater_dic = {
+                                location.a.text: play_time.text.split()}
+                            theater_list.append(theater_dic)
+                            movie_location_time_dic = {'8': {'location': '新北市', 'theater': {}}, '28': {
+                                'location': '台北市', 'theater': theater_list}}
+                        else:
+                            movie_location_time_dic = {'8': {'location': '新北市', 'theater': {}}, '28': {
+                                'location': '台北市', 'theater': []}}
+                    elif(area_id == 8):
+                        if(location and play_time != None):
+                            theater_dic = {
+                                location.a.text: play_time.text.split()}
+                            theater_list.append(theater_dic)
+                            movie_location_time_dic = {'8': {'location': '新北市', 'theater': theater_list}, '28': {
+                                'location': '台北市', 'theater': theater_list}}
+                        else:
+                            movie_location_time_dic = {'8': {'location': '新北市', 'theater': {}}, '28': {
+                                'location': '台北市', 'theater': []}}
+                    else:
+                        print('')
+
                     # try:
                     #     if(area_id == 8):
                     #         photoDic['location8'].append(movie_name.li.a.text)
@@ -225,8 +233,10 @@ for pages in li_number:
                     #         None
                     # except Exception:
                     #     pass
-            print(movie_location_time_list)
-            
+            movie_location_time_list.append(movie_location_time_dic)
+
+            # print(movie_location_time_list)
+            # print(movie_location_time_dic)
             # ------------------------------------------------
             # Write the data into json format
             sumDic = {
@@ -240,12 +250,14 @@ for pages in li_number:
                 "movie_photos": movie_photos_list,
                 "movie_introduction": movie_introduction,
                 "actors": actor_list,
-                "locations_with_movietimes":[]
+                "locations_with_movietimes": movie_location_time_list
             }
-            
+
             sumList.append(sumDic)
+            # print(sumList)
             movie_photos_list = []
             actor_list = []
+            theater_list = []
             movie_location_time_list = []
 with open(jsonFilePath, 'w', encoding="utf-8-sig") as jsonFile:
     e = json.dumps(sumList, ensure_ascii=False, indent=4)
