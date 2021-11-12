@@ -11,6 +11,7 @@ movie_photos_list = []
 actor_dic = {}
 actor_list = []
 theater_list = []
+theater_list2 = []
 movie_location_time_list = []
 movie_location_time_dic = {'8': {'location': '新北市', 'theater': {}}, '28': {
     'location': '台北市', 'theater': {}}}
@@ -199,31 +200,42 @@ for pages in li_number:
                 for location, play_time in zip(movie_theater_sp.find_all('li', class_='adds'), movie_theater_sp.find_all('div', class_='input_picker jq_input_picker')):
                 #TODO Fix the logic
                     if(area_id == 28):
-                        if(location and play_time != None):
+                        if(location.a.text and play_time.text.split() != None):
                             # print(play_time.text.split())
                             # print(location.a.text)
-
+                            theater_list.append(location.a.text)
+                            print(len(theater_list))
+                            
                             theater_dic = {
                                 location.a.text: play_time.text.split()}
-                            theater_list.append(theater_dic)
-                            movie_location_time_dic = {'8': {'location': '新北市', 'theater': {}}, '28': {
-                                'location': '台北市', 'theater': theater_list}}
+                            theater_list2.append(theater_dic)
+                            print(len(theater_list2))
+                            # print(len(theater_dic))
+                        
                         else:
-                            movie_location_time_dic = {'8': {'location': '新北市', 'theater': {}}, '28': {
-                                'location': '台北市', 'theater': []}}
-                    elif(area_id == 8):
-                        if(location and play_time != None):
-                            theater_dic = {
-                                location.a.text: play_time.text.split()}
-                            theater_list.append(theater_dic)
-                            movie_location_time_dic = {'8': {'location': '新北市', 'theater': theater_list}, '28': {
-                                'location': '台北市', 'theater': theater_list}}
-                        else:
-                            movie_location_time_dic = {'8': {'location': '新北市', 'theater': {}}, '28': {
-                                'location': '台北市', 'theater': []}}
+                            movie_location_time_dic['28']['theater'] = []
+                            # movie_location_time_dic = {'8': {'location': '新北市', 'theater': {}}, '28': {
+                            #     'location': '台北市', 'theater': []}}
+                    # elif(area_id == 8):
+                    #     if(location and play_time != None):
+                    #         theater_dic = {
+                    #             location.a.text: play_time.text.split()}
+                    #         theater_list.append(theater_dic)
+                            # movie_location_time_dic = {'8': {'location': '新北市', 'theater': theater_list}, '28': {
+                            #     'location': '台北市', 'theater': theater_list}}
+                        # else:
+                        #     movie_location_time_dic['8']['theater'] = []
+                            # movie_location_time_dic = {'8': {'location': '新北市', 'theater': {}}, '28': {
+                            #     'location': '台北市', 'theater': []}}
                     else:
                         print('')
-
+            if (len(theater_list) == len(theater_list2)):
+                if(area_id == 8):
+                    print('same amount')
+                    movie_location_time_dic = {'8': {'location': '新北市', 'theater': {}}, '28': {
+                        'location': '台北市', 'theater': theater_list2}}
+                # movie_location_time_dic['28']['theater'] = theater_list2
+                # print(movie_location_time_dic)
                     # try:
                     #     if(area_id == 8):
                     #         photoDic['location8'].append(movie_name.li.a.text)
@@ -254,10 +266,11 @@ for pages in li_number:
             }
 
             sumList.append(sumDic)
-            # print(sumList)
+            print(sumList)
             movie_photos_list = []
             actor_list = []
             theater_list = []
+            theater_list2 = []
             movie_location_time_list = []
 with open(jsonFilePath, 'w', encoding="utf-8-sig") as jsonFile:
     e = json.dumps(sumList, ensure_ascii=False, indent=4)
