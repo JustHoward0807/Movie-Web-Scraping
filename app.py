@@ -1,6 +1,5 @@
 ﻿from os import error
 import secrets
-from typing import Match
 from bs4 import BeautifulSoup
 import requests
 import json
@@ -11,19 +10,15 @@ page = 1
 movie_photos_list = []
 actor_dic = {}
 actor_list = []
-theater_list = []
-theater_list2 = []
-movie_location_time_list = []
-# //TODO:Make the movie_location_time only focus on theater dict because the area id and the locaition are stastic
-movie_location_time_dic = {'8': {'location': '新北市', 'theater': {}}, '28': {
-    'location': '台北市', 'theater': {}}}
+area_28_list = []
+area_8_list = []
 sumList = []
-area = [28, 8]
+area = [8,28]
 jsonFilePath = 'movie_output.json'
 now = datetime.now()
 current_time = now.strftime('%Y-%m-%d')
 
-        
+
 base_source = requests.get(
     f'https://movies.yahoo.com.tw/movie_intheaters.html').text
 soup = BeautifulSoup(base_source, 'lxml')
@@ -177,14 +172,6 @@ for pages in li_number:
                 #     trailer_video_URL = 'No Trailer'
 
             # ------------------------------------------------
-            
-            # def area(location, play_time):
-            #     global movie_location_time_dic
-            #     if(location.a.text and play_time.text.split() != None):
-            #         theater_list.append(location.a.text)
-            #         theater_dic = {location.a.text: play_time.text.split()}
-            #         theater_list2.append(theater_dic)
-            #         movie_location_time_dic = {'8': {'location': '新北市', 'theater': theater_list2}}
             # Movie Location and Times
             for area_id in area:
                 headers = {
@@ -208,96 +195,24 @@ for pages in li_number:
                 view = response.json()['view']
                 movie_theater_sp = BeautifulSoup(view, 'lxml')
                 # movie_theater = movie_theater_sp.find_all('ul')
+                # TODO: Enhance the logic without too much reptition
                 for location, play_time in zip(movie_theater_sp.find_all('li', class_='adds'), movie_theater_sp.find_all('div', class_='input_picker jq_input_picker')):
-                #TODO Fix the logic
-                 try:
                     match area_id:
                         case 8:
                             if(location.a.text and play_time.text.split() != None):
-                                theater_dic = {}
-                                theater_dic = {location.a.text: play_time.text.split()}
-                                theater_list.append(theater_dic)
+                                area_8 = {location.a.text: play_time.text.split()}
+                                area_8_list.append(area_8)
                                 print('新北市')
-                                # movie_location_time_dic = {'8': {'location': '新北市', 'theater': theater_list}}
-                                movie_location_time_dic['8']['theater'] = theater_dic
                             continue
                         case 28:
                             if(location.a.text and play_time.text.split() != None):
-                                theater_dic = {}
-                                theater_dic = {location.a.text: play_time.text.split()}
-                                theater_list2.append(theater_dic)
+                                area_28 = {location.a.text: play_time.text.split()}
+                                area_28_list.append(area_28)
                                 print('台北市')
-                                # movie_location_time_dic = {'28': {'location': '台北市', 'theater': theater_list2}}
-                                movie_location_time_dic['28']['theater'] = theater_dic
                             continue
-                    movie_location_time_list.append(movie_location_time_dic)
-                    print(movie_location_time_list)
-                            
-                        # case _:
-                        #     movie_location_time_dic = {'8': {'location': '新北市', 'theater': []}, '28': {'location': '台北市', 'theater': []}}
-                        #     continue
-                 except Exception:
-                     print('wrong')
-                     pass
-                    
-                '''if(area_id == 8):
-                        if(location.a.text and play_time.text.split() != None):
-                            # print(play_time.text.split())
-                            # print(location.a.text)
-                            theater_list.append(location.a.text)
-                            theater_dic = {
-                                location.a.text: play_time.text.split()}
-                            theater_list2.append(theater_dic)
-                            # print(len(theater_list))
-                            # print(len(theater_list2))
-                            # movie_location_time_dic = {'8': {'location': '新北市', 'theater': []}, '28': {
-                            #         'location': '台北市', 'theater': theater_list2}}
-                            movie_location_time_dic = {'8': {'location': '新北市', 'theater': theater_list2}}
-                            # if (len(theater_list) == len(theater_list2)):
-                            #     print('same amount')
-                            #     movie_location_time_dic = {'8': {'location': '新北市', 'theater': {}}, '28': {
-                            #         'location': '台北市', 'theater': theater_list2}}
-                            # else:
-                            #     movie_location_time_dic = {'8': {'location': '新北市', 'theater': {}}, '28': {
-                            #             'location': '台北市', 'theater': []}}
-                            # movie_location_time_dic = {'8': {'location': '新北市', 'theater': {}}, '28': {
-                            #     'location': '台北市', 'theater': []}}
-                    elif(area_id == 28):
-                        if(location.a.text and play_time.text.split() != None):
-                            
-                            theater_dic = {
-                                location.a.text: play_time.text.split()}
-                            theater_list.append(theater_dic)
-                            # movie_location_time_dic = {'8': {'location': '新北市', 'theater': theater_list}, '28': {
-                            #         'location': '台北市', 'theater': []}}
-                            movie_location_time_dic = {'28': {'location': '台北市', 'theater': theater_list}}
-                            # movie_location_time_dic = {'8': {'location': '新北市', 'theater': theater_list}, '28': {
-                            #     'location': '台北市', 'theater': theater_list}}
-                        # else:
-                        #     movie_location_time_dic['8']['theater'] = []
-                            # movie_location_time_dic = {'8': {'location': '新北市', 'theater': {}}, '28': {
-                            #     'location': '台北市', 'theater': []}}
-                    else:
-                        movie_location_time_dic = {'8': {'location': '新北市', 'theater': {}}, '28': {
-                                    'location': '台北市', 'theater': []}}
-                        # print('')
-            '''
-                # movie_location_time_dic['28']['theater'] = theater_list2
-                # print(movie_location_time_dic)
-                    # try:
-                    #     if(area_id == 8):
-                    #         photoDic['location8'].append(movie_name.li.a.text)
-                    #     elif(area_id== 28):
-                    #         photoDic['location28'].append(movie_name.li.a.text)
-                    #     else:
-                    #         None
-                    # except Exception:
-                    #     pass
-            movie_location_time_list.append(movie_location_time_dic)
-            print(movie_location_time_list)
-
-            # print(movie_location_time_list)
-            # print(movie_location_time_dic)
+                        case _:
+                            print('Something happened at location and play_time')
+                            break
             # ------------------------------------------------
             # Write the data into json format
             sumDic = {
@@ -311,19 +226,27 @@ for pages in li_number:
                 "movie_photos": movie_photos_list,
                 "movie_introduction": movie_introduction,
                 "actors": actor_list,
-                "locations_with_movietimes": movie_location_time_list
-                # //TODO:Make the movie_location_time only focus on theater dict because the area id and the locaition are stastic
-                # //TODO:"locations_with_movietimes": {'8': {'location': '新北市', 'theater': [!right here]}, '28': {'location': '台北市', 'theater': [!and here]}}
+                "locations_with_movietimes": {
+                    '8': {
+                        'location': '新北市',
+                        'theater': area_8_list
+                        },
+                    '28': {
+                        'location': '台北市', 
+                        'theater': area_28_list
+                        }
+                    
+                    
+                    
+                    }
             }
 
             sumList.append(sumDic)
             print(sumList)
             movie_photos_list = []
             actor_list = []
-            theater_list = []
-            theater_list2 = []
-            movie_location_time_list = []
+            area_28_list = []
+            area_8_list = []
 with open(jsonFilePath, 'w', encoding="utf-8-sig") as jsonFile:
     e = json.dumps(sumList, ensure_ascii=False, indent=4)
     jsonFile.write(e)
-
