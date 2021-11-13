@@ -156,7 +156,7 @@ for pages in li_number:
             # Get video from the trailer url
             trailer_source = requests.get(trailer_url).text
             trailer_soup = BeautifulSoup(trailer_source, 'lxml')
-            ## trailer_video = trailer_soup.find('div', class_='informbox _c notice')
+            # trailer_video = trailer_soup.find('div', class_='informbox _c notice')
             trailer_video = trailer_soup.find('div', class_='l_box_inner_20')
 
             try:
