@@ -7,6 +7,6 @@
  
  Tools: Python, JSON, BeautifulSoup4
   
- Check out the movie-output file to know what it's like.
+ ***Check out the movie-output file to know what it's like.***
  
  
