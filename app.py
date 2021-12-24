@@ -5,8 +5,10 @@ import requests
 import json
 from datetime import datetime
 
-
 page = 1
+imdb_rating = ''
+movie_duration=''
+movie_category_list = []
 movie_photos_list = []
 actor_dic = {}
 actor_list = []
@@ -77,8 +79,25 @@ for pages in li_number:
                 f'https://movies.yahoo.com.tw/movieinfo_main/{movie_id}').text
             info_soup = BeautifulSoup(info_source, 'lxml')
             try:
+                imdb_rating = ""
                 movie_rating = info_soup.find(
                     'div', class_='score_num count').text
+                movie_information = info_soup.find('div', class_='movie_intro_info_r')
+                
+                
+                # Movie Category
+                for category in movie_information.find_all('div', class_='level_name'):
+                    movie_category = category.find('a', class_='gabtn').text.strip()
+                    movie_category_list.append(movie_category)
+                
+                #Movie Information such as IMDB rating and movie play time duration
+                for match in movie_information.find_all('span'):
+                    if 'IMDb分數' in match.string:
+                        imdb_rating = match.string.replace('IMDb分數：','')
+                    elif '片　　長：' in match.string:
+                        movie_duration = match.string.replace('片　　長：','')
+                    else:
+                        pass
                 print(f'Movie rating is: {movie_rating.strip()}')
             except Exception as e:
                 print(f'Something happened with movie rating: {e}')
@@ -220,6 +239,9 @@ for pages in li_number:
                 "movie_cn_name": movie_cn_name,
                 "movie_en_name": movie_en_name,
                 "movie_rating": movie_rating,
+                "movie_imdb_rating": imdb_rating,
+                "movie_duration": movie_duration,
+                "movie_category": movie_category_list,
                 "release_movie_time": release_movie_time,
                 "movie_trailer": trailer_video_URL,
                 "movie_poster": movie_poster,
@@ -247,6 +269,7 @@ for pages in li_number:
             actor_list = []
             area_28_list = []
             area_8_list = []
+            movie_category_list = []
 with open(jsonFilePath, 'w', encoding="utf-8-sig") as jsonFile:
     e = json.dumps(sumList, ensure_ascii=False, indent=4)
     jsonFile.write(e)
