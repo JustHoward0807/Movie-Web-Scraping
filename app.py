@@ -48,8 +48,8 @@ for pages in li_number:
 
             # ------------------------------------------------
             movie_cn_name = movie.find('div', class_='release_movie_name').a.text.replace(
-                ' ', '').replace('\n', '')
-            print(f'Movie name is: {movie_cn_name.strip()}')
+                ' ', '').replace('\n','')
+            print(f'Movie name is: {movie_cn_name}')
             # ------------------------------------------------
 
             movie_en_name = movie.find('div', class_='en').text.strip()
@@ -135,7 +135,8 @@ for pages in li_number:
                 actor_img = actor_ul.find_all('div', class_='fotoinner')
 
                 for name, img in zip(actor_name, actor_img):
-                    actor_names = name.find('h2').text.split(" ")[0]
+                    actor_names = name.find('h2').text.split(" ")[0].strip()
+                    print(actor_names)
                     actor_photos = img.find('img')['src']
                     if (actor_photos == '/build/images/noavatar.jpg'):
                         actor_photos = ""
@@ -213,8 +214,7 @@ for pages in li_number:
                                         headers=headers, params=params, cookies=secrets.cookies)
                 view = response.json()['view']
                 movie_theater_sp = BeautifulSoup(view, 'lxml')
-                # movie_theater = movie_theater_sp.find_all('ul')
-                # TODO: Enhance the logic without too much reptition
+
                 for location, play_time in zip(movie_theater_sp.find_all('li', class_='adds'), movie_theater_sp.find_all('div', class_='input_picker jq_input_picker')):
                     match area_id:
                         case 8:
