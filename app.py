@@ -1,9 +1,12 @@
-﻿from os import error
+﻿from distutils.command import upload
+from os import error
 import secrets
 from bs4 import BeautifulSoup
 import requests
 import json
 from datetime import datetime
+
+from firestoreUploader import deleteDoc, uploadFirestore
 
 page = 1
 imdb_rating = ''
@@ -12,10 +15,10 @@ movie_category_list = []
 movie_photos_list = []
 actor_dic = {}
 actor_list = []
-area_28_list = []
-area_8_list = []
+# area_28_list = []
+# area_8_list = []
 sumList = []
-area = [8,28]
+# area = [8,28]
 jsonFilePath = 'movie_output.json'
 now = datetime.now()
 current_time = now.strftime('%Y-%m-%d')
@@ -34,7 +37,6 @@ for pages in li_number:
         '上一頁', '').replace('下一頁', '').replace('›', '')
 
     # According to the length of the page number to decide how many times the loop will execute
-    # //TODO:Remove the list varaibles
     for pagenum in range(len(page_number)):
         page += 1
         movies = soup.find('ul', class_='release_list')
@@ -126,11 +128,12 @@ for pages in li_number:
 
             # ------------------------------------------------
             # Movie Actors Pics and Names
-            actor_main = info_soup.find('div', class_='l_box have_arbox _c')
-            actor_ul = actor_main.find(
-                'ul', class_='trailer_list alist starlist')
+            
 
             try:
+                actor_main = info_soup.find('div', class_='l_box have_arbox _c')
+                actor_ul = actor_main.find(
+                    'ul', class_='trailer_list alist starlist')
                 actor_name = actor_ul.find_all('div', class_='actor_inner')
                 actor_img = actor_ul.find_all('div', class_='fotoinner')
 
@@ -167,19 +170,21 @@ for pages in li_number:
             # ------------------------------------------------
             # Movies Trailer URL
 
-            # Get trailer url
-            trailer = info_soup.find(
-                'div', class_='maincontent ga_trailer movie_intro')
-            trailer2 = trailer.find('div', class_='movie_tab')
-            trailer_url = trailer2.find_all('a', class_='gabtn')[1]['href']
-
-            # Get video from the trailer url
-            trailer_source = requests.get(trailer_url).text
-            trailer_soup = BeautifulSoup(trailer_source, 'lxml')
-            # trailer_video = trailer_soup.find('div', class_='informbox _c notice')
-            trailer_video = trailer_soup.find('div', class_='l_box_inner_20')
+            
 
             try:
+                # Get trailer url
+                trailer = info_soup.find(
+                    'div', class_='maincontent ga_trailer movie_intro')
+                trailer2 = trailer.find('div', class_='movie_tab')
+                trailer_url = trailer2.find_all('a', class_='gabtn')[1]['href']
+
+                # Get video from the trailer url
+                trailer_source = requests.get(trailer_url).text
+                trailer_soup = BeautifulSoup(trailer_source, 'lxml')
+                # trailer_video = trailer_soup.find('div', class_='informbox _c notice')
+                trailer_video = trailer_soup.find('div', class_='l_box_inner_20')
+                
                 trailer_video_URL = trailer_video.find_all('a')[0]['href']
                 ## trailer_video_iframe = trailer_video.find('iframe')['src'].split('?')[0]
 
@@ -193,46 +198,48 @@ for pages in li_number:
 
             # ------------------------------------------------
             # Movie Location and Times
-            for area_id in area:
-                headers = {
-                    'User-Agent': '{secrets.User_agent}',
-                    'Accept': '*/*',
-                    'Accept-Language': 'en-US,en;q=0.5',
-                    'Referer': 'https://movies.yahoo.com.tw/movietime_result.html/id={movie_id}',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Connection': 'keep-alive',
-                    'TE': 'Trailers',
-                }
+            # for area_id in area:
+            #     headers = {
+            #         'User-Agent': '{secrets.User_agent}',
+            #         'Accept': '*/*',
+            #         'Accept-Language': 'en-US,en;q=0.5',
+            #         'Referer': 'https://movies.yahoo.com.tw/movietime_result.html/id={movie_id}',
+            #         'X-Requested-With': 'XMLHttpRequest',
+            #         'Connection': 'keep-alive',
+            #         'TE': 'Trailers',
+            #     }
 
-                params = (
-                    ('movie_id', movie_id),
-                    ('date', current_time),
-                    ('area_id', area_id),
-                )
+            #     params = (
+            #         ('movie_id', movie_id),
+            #         ('date', current_time),
+            #         ('area_id', area_id),
+            #     )
 
-                response = requests.get('https://movies.yahoo.com.tw/ajax/pc/get_schedule_by_movie',
-                                        headers=headers, params=params, cookies=secrets.cookies)
-                view = response.json()['view']
-                movie_theater_sp = BeautifulSoup(view, 'lxml')
+            #     response = requests.get('https://movies.yahoo.com.tw/ajax/pc/get_schedule_by_movie',
+            #                             headers=headers, params=params, cookies=secrets.cookies)
+            #     view = response.json()['view']
+            #     movie_theater_sp = BeautifulSoup(view, 'lxml')
 
-                for location, play_time in zip(movie_theater_sp.find_all('li', class_='adds'), movie_theater_sp.find_all('div', class_='input_picker jq_input_picker')):
-                    match area_id:
-                        case 8:
-                            if(location.a.text and play_time.text.split() != None):
-                                area_8 = {location.a.text: play_time.text.split()}
-                                area_8_list.append(area_8)
-                                print('新北市')
-                            continue
-                        case 28:
-                            if(location.a.text and play_time.text.split() != None):
-                                area_28 = {location.a.text: play_time.text.split()}
-                                area_28_list.append(area_28)
-                                print('台北市')
-                            continue
-                        case _:
-                            print('Something happened at location and play_time')
-                            break
+            #     for location, play_time in zip(movie_theater_sp.find_all('li', class_='adds'), movie_theater_sp.find_all('div', class_='input_picker jq_input_picker')):
+            #         match area_id:
+            #             case 8:
+            #                 if(location.a.text and play_time.text.split() != None):
+            #                     area_8 = {location.a.text: play_time.text.split()}
+            #                     area_8_list.append(area_8)
+            #                     print('新北市')
+            #                 continue
+            #             case 28:
+            #                 if(location.a.text and play_time.text.split() != None):
+            #                     area_28 = {location.a.text: play_time.text.split()}
+            #                     area_28_list.append(area_28)
+            #                     print('台北市')
+            #                 continue
+            #             case _:
+            #                 print('Something happened at location and play_time')
+            #                 break
             # ------------------------------------------------
+            deleteDoc()
+            uploadFirestore(movie_id,movie_cn_name,movie_en_name,movie_rating,imdb_rating,movie_duration,movie_category_list, release_movie_time,trailer_video_URL, movie_poster, movie_photo_list, movie_introduction, actor_list)
             # Write the data into json format
             sumDic = {
                 "movie_id": movie_id,
@@ -248,19 +255,19 @@ for pages in li_number:
                 "movie_photos": movie_photos_list,
                 "movie_introduction": movie_introduction,
                 "actors": actor_list,
-                "locations_with_movietimes": {
-                    '8': {
-                        'location': '新北市',
-                        'theater': area_8_list
-                        },
-                    '28': {
-                        'location': '台北市', 
-                        'theater': area_28_list
-                        }
+                # "locations_with_movietimes": {
+                #     '8': {
+                #         'location': '新北市',
+                #         'theater': area_8_list
+                #         },
+                #     '28': {
+                #         'location': '台北市', 
+                #         'theater': area_28_list
+                #         }
                     
                     
                     
-                    }
+                #     }
             }
 
             sumList.append(sumDic)

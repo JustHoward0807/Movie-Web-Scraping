@@ -2,3 +2,4 @@ secrets.py
 key
 .vscode
 __pycache__
+firebase-admin.json
